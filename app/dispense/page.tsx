@@ -9,10 +9,30 @@ export default function DispensePage() {
 
   const [message, setMessage] = useState("");
 
-  function handleDispense(slot: string) {
-    // Later this will call your Raspberry Pi backend
-    setMessage(`Dispensing from ${slot}...`);
+  async function handleDispense(slot: string) {
+  const PI_IP = "http://10.166.153.56:5000";
+
+  try {
+    const response = await fetch(`${PI_IP}/api/dispense`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ slot }),
+    });
+
+    const data = await response.json();
+
+    if (data.ok) {
+      setMessage(`✅ Dispensed ${slot} at angle ${data.angle}`);
+    } else {
+      setMessage(`❌ Error: ${data.error}`);
+    }
+  } catch (error) {
+    setMessage("❌ Could not connect to Raspberry Pi");
   }
+}
+
 
   return (
     <main className="min-h-screen bg-white">
